@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>{{ book.title }}</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial; background:#f7f9fb; margin:0; padding:28px; color:#222; }
+    .container { max-width:800px; margin:0 auto; background:#fff; padding:20px 24px; border-radius:10px; box-shadow: 0 6px 18px rgba(20,20,50,0.06); }
+    a.back { color:#2563eb; text-decoration:none; display:inline-block; margin-bottom:12px; }
+    .top { display:flex; gap:18px; align-items:flex-start; }
+    .cover { width:160px; height:220px; background:#eee; border-radius:6px; object-fit:cover; }
+    .meta { flex:1; }
+    h1 { margin:0 0 8px 0; font-size:20px; }
+    .author { color:#555; margin-bottom:8px; }
+    .info { margin-top:14px; color:#333; line-height:1.5; }
+    .row { margin-top:10px; display:flex; gap:12px; align-items:center; }
+    .badge { background:#eef2ff; color:#1e3a8a; padding:6px 10px; border-radius:999px; font-weight:600; font-size:13px; }
+    .muted { color:#6b7280; font-size:13px; }
+    .actions { margin-top:18px; display:flex; gap:12px; }
+    .btn { text-decoration:none; background:#2563eb; color:white; padding:8px 14px; border-radius:8px; font-weight:600; transition:0.2s; }
+    .btn:hover { background:#1e40af; }
+    @media (max-width:600px){ .top{flex-direction:column; align-items:center;} .cover{width:140px;height:200px;} .meta{width:100%} }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a class="back" href="/books/page">← Back to books</a>
+    <div class="top">
+      {% if book.cover_url %}
+        <img src="{{ book.cover_url }}" alt="cover" class="cover" onerror="this.style.display='none'">
+      {% else %}
+        <div class="cover" style="display:flex;align-items:center;justify-content:center;color:#9ca3af;font-weight:700;">IMG</div>
+      {% endif %}
+      <div class="meta">
+        <h1>{{ book.title }}</h1>
+        <div class="author">{{ book.author or 'Unknown Author' }}</div>
+
+        <div class="row">
+          <div class="badge">Total: {{ book.total_copies }}</div>
+          <div class="muted">Available: {{ book.available_copies }}</div>
+          <div class="muted">Added: {{ book.added_at.strftime('%Y-%m-%d') if book.added_at else '—' }}</div>
+        </div>
+
+        <div class="info">
+          <p><strong>ISBN:</strong> {{ book.isbn or '—' }}</p>
+        </div>
+
+        <div class="actions">
+          <a class="btn" href="#">Add to Cart</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

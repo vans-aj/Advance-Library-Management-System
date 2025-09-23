@@ -1,10 +1,10 @@
-# app/__init__.py
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 import os
 
 load_dotenv()
+
 db = SQLAlchemy()
 
 def create_app():
@@ -12,17 +12,20 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+    # initialize extensions with the app
     db.init_app(app)
 
-    # import models so they register with SQLAlchemy
+    # import models so SQLAlchemy knows about them
     from . import models
 
-    # import and register blueprints AFTER db is initialized
+    # import and register blueprints AFTER db/init and models import
     from .routes import bp as main_bp
     app.register_blueprint(main_bp)
+
+    from .book_routes import bp as books_bp
+    app.register_blueprint(books_bp, url_prefix="/books")
 
     @app.route("/")
     def home():
         return "Factory pattern working!"
-
-    return app
+    return app  
