@@ -1,10 +1,23 @@
 # app/book_routes.py
-from flask import Blueprint, request, jsonify, render_template, redirect, url_for
+from flask import Blueprint, request, jsonify, render_template, redirect, url_for, session
+from functools import wraps
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import or_
 from . import db
 from .models import Book
 
 bp = Blueprint("books", __name__)
+
+def login_required_html(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if 'student_id' not in session:
+            # redirect to login page; include next param so we return after login
+            return redirect(url_for("main.login", next=request.path))
+        return f(*args, **kwargs)
+    return wrapper
+
+
 
 def _get_request_data():
     data = request.get_json(silent=True)
@@ -12,19 +25,22 @@ def _get_request_data():
         data = request.form.to_dict()
     return data
 
-# -------- Server-rendered pages --------
+# -------- Server-rendered pages (protected) --------
 @bp.route("/page", methods=["GET"])
+@login_required_html
 def books_page():
-    """HTML list of books"""
+    """HTML list of books (login required)"""
     books = Book.query.order_by(Book.added_at.desc()).all()
     return render_template("list_books.html", books=books)
 
 @bp.route("/add", methods=["GET"])
+@login_required_html
 def add_book_page():
-    """HTML form to add a book"""
+    """HTML form to add a book (login required)"""
     return render_template("add_book.html")
 
 @bp.route("/add", methods=["POST"])
+@login_required_html
 def add_book_from_form():
     """
     Form POST endpoint for browser Add Book page.
@@ -65,8 +81,9 @@ def add_book_from_form():
     return redirect(url_for("books.books_page"))
 
 @bp.route("/page/<int:book_id>", methods=["GET"])
+@login_required_html
 def book_detail_page(book_id):
-    """HTML detail page for a single book"""
+    """HTML detail page for a single book (login required)"""
     b = Book.query.get(book_id)
     if not b:
         return render_template("book_not_found.html", book_id=book_id), 404
@@ -129,7 +146,7 @@ def list_books():
     if q:
         like = f"%{q}%"
         query = query.filter(
-            db.or_(
+            or_(
                 Book.title.ilike(like),
                 Book.author.ilike(like),
                 Book.isbn.ilike(like)
